@@ -12,13 +12,13 @@ track_history = defaultdict(lambda: [])
 model = YOLO("yolov9c.pt")
 names = model.model.names
 
-video_path = "/home/fadymaher/git-fedora/Human-Detection-using-YOLO-V8/data/People-Walking.mp4"
+video_path = "/home/fadymaher/git-fedora/Object-Tracking-YOLO-V9/data/People-Walking.mp4"
 cap = cv2.VideoCapture(video_path)
 assert cap.isOpened(), "Error reading video file"
 
 w, h, fps = (int(cap.get(x)) for x in (cv2.CAP_PROP_FRAME_WIDTH, cv2.CAP_PROP_FRAME_HEIGHT, cv2.CAP_PROP_FPS))
 
-output_video_file = '/home/fadymaher/git-fedora/Human-Detection-using-YOLO-V8/output/object_tracking.mp4'
+output_video_file = '/home/fadymaher/git-fedora/Object-Tracking-YOLO-V9/output/object_tracking_CPU.mp4'
 result = cv2.VideoWriter(output_video_file,
                        cv2.VideoWriter_fourcc(*'mp4v'),
                        fps,
@@ -28,14 +28,14 @@ while cap.isOpened():
     success, frame = cap.read()
     if success:
         results = model.track(frame, persist=True, verbose=False)
-        boxes = results[0].boxes.xyxy
+        boxes = results[0].boxes.xyxy.cpu()
 
         if results[0].boxes.id is not None:
 
             # Extract prediction results
-            clss = results[0].boxes.cls.tolist()
-            track_ids = results[0].boxes.id.int().tolist()
-            confs = results[0].boxes.conf.float().tolist()
+            clss = results[0].boxes.cls.cpu().tolist()
+            track_ids = results[0].boxes.id.int().cpu().tolist()
+            confs = results[0].boxes.conf.float().cpu().tolist()
 
             # Annotator Init
             annotator = Annotator(frame, line_width=2)
